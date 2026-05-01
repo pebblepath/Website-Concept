@@ -200,12 +200,68 @@
 
   /* HERO */
   .hero {
-    padding: 160px 48px 100px;
-    min-height: 92vh;
+    padding: 136px 48px 100px;
+    min-height: 78vh;
     display: flex; align-items: center; justify-content: center;
     text-align: center;
     background: linear-gradient(160deg, var(--teal-deep) 0%, var(--teal-dark) 30%, var(--teal) 55%, var(--teal-light) 80%, var(--sand-light) 100%);
     position: relative; overflow: hidden;
+  }
+  /* .hero-inner wraps the text + (desktop) the mockup so they can flex
+     into a 2-column layout above 1024px without disturbing the mobile
+     centered layout. On mobile, .hero-mockup is display:none and
+     .hero-inner just acts as a transparent passthrough. */
+  .hero-inner {
+    position: relative; z-index: 2;
+    width: 100%;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .hero-mockup { display: none; }
+
+  /* Desktop split-hero (≥1024px): wordmark + CTAs LEFT, dual-iPhone RIGHT.
+     Tablets (<1024px) stay on the centered single-column layout because the
+     mockup needs real estate to feel premium, not crammed. */
+  @media (min-width: 1024px) {
+    .hero { padding: 119px 64px 80px; }
+    /* Left column: text-align: center keeps wordmark, h1, paragraph and
+       button all on a single shared center axis (mirrors the mobile hero
+       composition, just constrained to the left half of the viewport). */
+    .hero-content {
+      max-width: 600px;
+      margin: 0;
+      flex: 1 1 0;
+      text-align: center;
+    }
+    .hero-wordmark { display: inline-block; }
+    .hero h1 { margin-left: auto; margin-right: auto; }
+    .hero p { margin-left: auto; margin-right: auto; max-width: 480px; }
+    .hero-buttons { justify-content: center; margin-top: 32px; }
+    .hero-inner {
+      max-width: 1280px;
+      gap: 40px;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .hero-mockup {
+      display: block;
+      flex: 1 1 0;
+      max-width: 640px;
+      pointer-events: none;
+    }
+    .hero-mockup img {
+      display: block;
+      width: 100%;
+      height: auto;
+      transform: translateX(20px); /* nudge right so iPhone tilt overflows the column edge for drama */
+      /* No drop-shadow filter — the PNG already includes the warm rim-light
+         and own shadow, and a CSS shadow on a transparent PNG would smear
+         around the iPhone silhouettes against the teal hero. */
+    }
+  }
+  /* Even wider (≥1280px): give the mockup a bit more room */
+  @media (min-width: 1280px) {
+    .hero-content { max-width: 580px; }
+    .hero-mockup { max-width: 720px; }
   }
 
   /* Scroll cue (mobile only) — anchored bottom-center of hero with subtle bounce */
@@ -1410,19 +1466,27 @@
   <video class="hero-video" autoplay muted loop playsinline>
     <source src="assets/Pebble-header.mp4" type="video/mp4">
   </video>
-  <div class="hero-content">
-    <div class="pp-wordmark hero-wordmark">PebblePath</div>
-    <h1>for every little milestone</h1>
-    <p>Personalized growth tracking, proactive AI guidance, and pediatrician-ready summaries &mdash; built for the early years.</p>
-    <div class="hero-buttons">
-      <!-- TODO: Once App Store ID is assigned, swap href to https://apps.apple.com/app/pebblepath-ai/id<XXXXXXXXX> -->
-      <a href="https://apps.apple.com/app/pebblepath-ai/" class="hero-mobile-download" target="_blank" rel="noopener">
-        <svg viewBox="0 0 384 512" fill="currentColor" aria-hidden="true"><path d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zM248.6 84.7c33.5-39.8 30.4-76 29.4-89-29.6 1.7-63.8 20.1-83.3 42.7-21.5 24.2-34.1 54.1-31.4 87.6 32 2.5 61.1-13.9 85.3-41.3z"/></svg>
-        Download
-      </a>
-      <a href="#showcase" class="btn-secondary">See How It Works</a>
+  <div class="hero-inner">
+    <div class="hero-content">
+      <div class="pp-wordmark hero-wordmark">PebblePath</div>
+      <h1>for every little milestone</h1>
+      <p>Personalized growth tracking, proactive AI guidance, and pediatrician-ready summaries &mdash; built for the early years.</p>
+      <div class="hero-buttons">
+        <!-- TODO: Once App Store ID is assigned, swap href to https://apps.apple.com/app/pebblepath-ai/id<XXXXXXXXX> -->
+        <a href="https://apps.apple.com/app/pebblepath-ai/" class="hero-mobile-download" target="_blank" rel="noopener">
+          <svg viewBox="0 0 384 512" fill="currentColor" aria-hidden="true"><path d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zM248.6 84.7c33.5-39.8 30.4-76 29.4-89-29.6 1.7-63.8 20.1-83.3 42.7-21.5 24.2-34.1 54.1-31.4 87.6 32 2.5 61.1-13.9 85.3-41.3z"/></svg>
+          Download
+        </a>
+        <a href="#showcase" class="btn-secondary">See How It Works</a>
+      </div>
     </div>
-  </div>
+
+    <!-- Desktop-only dual-iPhone mockup. Hidden on mobile so the existing
+         centered hero (wordmark + tagline + CTAs + scroll cue) stays clean. -->
+    <div class="hero-mockup" aria-hidden="true">
+      <img src="assets/hero-dual-iphone.png" alt="">
+    </div>
+  </div><!-- /.hero-inner -->
 
   <!-- Mobile-only scroll indicator anchored to the hero's bottom edge -->
   <a href="#features" class="scroll-cue" aria-label="Scroll to features">
