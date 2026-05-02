@@ -1419,6 +1419,14 @@
   }
   .cta-final-badges { display: flex; gap: 12px; justify-content: center; }
 
+  /* ============================================================
+     MOBILE CAROUSEL — App-Store-style horizontal swipe of real
+     screenshots. Default display:none so it never shows on desktop;
+     the mobile media query (max-width:768px) flips it on. Uses native
+     CSS scroll-snap-x for the swipe; tiny JS just updates dot state. */
+  .ms-carousel { display: none; }
+  /* ============================================================ */
+
   /* MOBILE FEATURE CARDS (replaces parallax on mobile) */
   .mobile-features {
     display: none;
@@ -1533,19 +1541,109 @@
     /* Showcase: kill the sticky-phone parallax on mobile (clunky on touch).
        Hide the desktop grid entirely and show a clean stack of feature
        cards — each card has its own static phone-shaped mockup. */
-    .showcase-section { padding: 0 0 16px; }
+    .showcase-section { padding: 0 0 24px; }
     .showcase-grid { display: none; }
     .scroll-hint { display: none; }
-    .mobile-features {
-      display: flex;
-      flex-direction: column;
-      gap: 28px;
-      padding: 8px 20px 4px;
-      max-width: 420px;
-      margin: 0 auto;
-    }
+    /* Legacy vertical-stack mobile fallback hidden — replaced by .ms-carousel */
+    .mobile-features { display: none; }
     .showcase-section h2.showcase-heading { padding: 24px 20px 0; font-size: 26px; }
     .showcase-section .showcase-subhead { font-size: 14px; margin-bottom: 12px; }
+
+    /* ===== Mobile horizontal carousel ===== */
+    .ms-carousel {
+      display: block;
+      position: relative;
+      padding: 4px 0 8px;
+    }
+    /* Track: native horizontal scroll with snap. Hide scrollbar entirely. */
+    .ms-track {
+      display: flex;
+      overflow-x: auto;
+      overflow-y: hidden;
+      scroll-snap-type: x mandatory;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+      gap: 16px;
+      /* Inner gutter so first/last slide can center under viewport */
+      padding: 12px 12vw 24px;
+      scroll-padding: 12vw;
+    }
+    .ms-track::-webkit-scrollbar { display: none; }
+    /* Each slide takes ~76% of viewport width; the rest peeks neighbors */
+    .ms-slide {
+      flex: 0 0 76vw;
+      max-width: 360px;
+      scroll-snap-align: center;
+      scroll-snap-stop: always;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    /* Phone-shaped frame around each screenshot — slim bezel, soft shadow */
+    .ms-phone {
+      width: 100%;
+      aspect-ratio: 700 / 1520;
+      border-radius: 32px;
+      overflow: hidden;
+      background: #000;
+      box-shadow:
+        0 18px 40px rgba(44,62,64,0.18),
+        0 0 0 1px rgba(0,0,0,0.04);
+      margin-bottom: 14px;
+    }
+    .ms-phone img {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    /* Slide caption underneath the phone */
+    .ms-text {
+      text-align: center;
+      max-width: 320px;
+      padding: 0 8px;
+    }
+    .ms-text .feature-label {
+      font-size: 10px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 1.6px;
+      color: var(--terracotta);
+      margin-bottom: 6px;
+    }
+    .ms-text h3 {
+      font-family: 'Nunito', sans-serif;
+      font-size: 19px; font-weight: 800;
+      color: var(--charcoal); line-height: 1.25;
+      margin-bottom: 6px;
+    }
+    .ms-text p {
+      font-size: 14px; line-height: 1.55; color: var(--warm-gray);
+    }
+    /* Pagination dots */
+    .ms-dots {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 14px;
+    }
+    .ms-dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      border: 0;
+      padding: 0;
+      background: rgba(44,62,64,0.20);
+      cursor: pointer;
+      transition: background 0.2s, transform 0.2s, width 0.25s ease;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .ms-dot.is-active {
+      background: var(--teal-dark);
+      width: 22px;
+      border-radius: 4px;
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .ms-track { scroll-behavior: auto; }
+      .ms-dot { transition: none; }
+    }
 
     .how-it-works { padding: 28px 20px; }
     .steps-grid { grid-template-columns: 1fr 1fr; gap: 12px; }
@@ -1997,6 +2095,63 @@
     </div>
   </div>
 
+  <!-- Mobile carousel — App-Store-style horizontal swipe through real
+       screenshots. Shown only on mobile (max-width: 768px). Native CSS
+       scroll-snap-x for the swipe behavior; tiny JS for dot pagination. -->
+  <div class="ms-carousel" aria-roledescription="carousel" aria-label="App screenshots">
+    <div class="ms-track" id="msTrack">
+      <div class="ms-slide">
+        <div class="ms-phone"><img src="assets/screens/dashboard.jpg" alt="PebblePath dashboard" loading="lazy"></div>
+        <div class="ms-text">
+          <div class="feature-label">Dashboard</div>
+          <h3>Everything at a glance.</h3>
+          <p>Today's milestones, what's coming next, and the patterns Pebble has spotted &mdash; all in one calm view.</p>
+        </div>
+      </div>
+      <div class="ms-slide">
+        <div class="ms-phone"><img src="assets/screens/pebble.jpg" alt="Pebble AI advisor chat" loading="lazy"></div>
+        <div class="ms-text">
+          <div class="feature-label">Pebble Advisor</div>
+          <h3>Ask anything. Get evidence-based answers.</h3>
+          <p>Pebble knows your child. Calm, expert guidance &mdash; not a generic chatbot.</p>
+        </div>
+      </div>
+      <div class="ms-slide">
+        <div class="ms-phone"><img src="assets/screens/milestones.jpg" alt="Milestones list" loading="lazy"></div>
+        <div class="ms-text">
+          <div class="feature-label">Milestones</div>
+          <h3>Track progress, not perfection.</h3>
+          <p>100+ milestones across four domains, with statuses that reflect reality.</p>
+        </div>
+      </div>
+      <div class="ms-slide">
+        <div class="ms-phone"><img src="assets/screens/tips.jpg" alt="Tips and guidance feed" loading="lazy"></div>
+        <div class="ms-text">
+          <div class="feature-label">Tips &amp; Guidance</div>
+          <h3>What to focus on next.</h3>
+          <p>Proactive, personalized tips refreshed weekly &mdash; for your child <em>and</em> for you.</p>
+        </div>
+      </div>
+      <div class="ms-slide">
+        <div class="ms-phone"><img src="assets/screens/pediatrician.jpg" alt="Pediatrician summary export" loading="lazy"></div>
+        <div class="ms-text">
+          <div class="feature-label">Pediatrician summary</div>
+          <h3>Walk into every visit prepared.</h3>
+          <p>Export a clinician-toned PDF covering all four domains.</p>
+        </div>
+      </div>
+    </div>
+    <div class="ms-dots" id="msDots" aria-hidden="true">
+      <button type="button" class="ms-dot is-active" data-index="0"></button>
+      <button type="button" class="ms-dot" data-index="1"></button>
+      <button type="button" class="ms-dot" data-index="2"></button>
+      <button type="button" class="ms-dot" data-index="3"></button>
+      <button type="button" class="ms-dot" data-index="4"></button>
+    </div>
+  </div>
+
+  <!-- Legacy stacked-card mobile fallback (now hidden by default — kept in
+       DOM as a non-JS / no-snap fallback if scroll-snap fails). -->
   <!-- Mobile feature cards (shown only on mobile, replacing parallax).
        Each mf-phone-inner clones from #ss-N by ID; reorder these cards +
        change the mf-screen-N id to update the mobile narrative. -->
@@ -2373,6 +2528,40 @@ document.querySelectorAll('.mf-phone-inner').forEach(container => {
     container.appendChild(clone);
   }
 });
+
+// Mobile carousel — sync pagination dots with native scroll-snap position
+(function () {
+  const track = document.getElementById('msTrack');
+  const dotsEl = document.getElementById('msDots');
+  if (!track || !dotsEl) return;
+  const slides = Array.from(track.querySelectorAll('.ms-slide'));
+  const dots = Array.from(dotsEl.querySelectorAll('.ms-dot'));
+
+  // IntersectionObserver: watch which slide is most-visible, mark its dot active
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      if (entry.isIntersecting && entry.intersectionRatio > 0.6) {
+        const idx = slides.indexOf(entry.target);
+        if (idx === -1) return;
+        dots.forEach((d, i) => d.classList.toggle('is-active', i === idx));
+      }
+    });
+  }, {
+    root: track,
+    threshold: [0.6, 0.85],
+  });
+  slides.forEach((s) => io.observe(s));
+
+  // Click a dot → smooth-scroll the corresponding slide into view
+  dots.forEach((dot, i) => {
+    dot.addEventListener('click', () => {
+      const slide = slides[i];
+      if (!slide) return;
+      // scrollIntoView with {inline: 'center'} respects scroll-snap
+      slide.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+    });
+  });
+})();
 </script>
 
 </body>
