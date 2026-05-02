@@ -202,7 +202,7 @@ footer a:hover { opacity: 1; }
 
 <div class="eyebrow">Privacy Policy</div>
 <h1>How we handle your information</h1>
-<p class="meta"><strong>Effective date:</strong> [to be set on publish] · <strong>Last updated:</strong> [to be set on publish]</p>
+<p class="meta"><strong>Effective date:</strong> May 2, 2026 · <strong>Last updated:</strong> May 2, 2026</p>
 
 <p class="intro">This Privacy Policy describes how PebblePath ("PebblePath," "we," "us," or "our") collects, uses, and shares information when you use the PebblePath mobile application and the website at <a href="https://pebblepath.ai">pebblepath.ai</a> (together, the "Service").</p>
 
@@ -265,6 +265,18 @@ footer a:hover { opacity: 1; }
   <li>Anthropic retains API request data for a limited operational period (typically 30 days for safety review) before deletion.</li>
   <li>We do not send your name, email, or contact information to Anthropic — only the child profile context needed to produce a useful answer.</li>
 </ul>
+
+<h3>4.1 Web search</h3>
+<p>For questions that benefit from current, public information (e.g. "what kid-friendly museums are open this Saturday near us?"), Pebble may use Anthropic's hosted web search tool. The search runs on Anthropic's infrastructure; we do not operate or read the underlying searches. Only the question text and the relevant child context (which never includes your name, email, or contact details) are passed to the tool. Search results are returned to Pebble, which uses them to compose its answer; the raw results are not separately stored on our servers.</p>
+
+<h3>4.2 Synthesized continuity profile</h3>
+<p>To help Pebble provide useful guidance over time (rather than starting fresh each conversation), our backend periodically generates a short synthesized <strong>continuity profile</strong> for each child you've added. This profile is created from data you've already provided in PebblePath — recent conversations with Pebble, milestones marked as achieved, observations you've logged, and which tips or insights you've engaged with — and is sent back to Pebble at the start of future conversations as context.</p>
+<ul>
+  <li>The synthesis is generated on a schedule (typically nightly) by Anthropic's Claude model on our backend. The same Anthropic data-handling terms in this section apply.</li>
+  <li>The profile is used only to personalize <strong>your own</strong> Pebble responses for <strong>your own</strong> child. It is not used to train any model, and it is not shared with anyone outside your family group (your co-parent who has joined the same family is, by design, the same audience).</li>
+  <li>You can delete the underlying conversation history at any time from the Pebble screen, which clears the input that the next synthesis would draw on.</li>
+</ul>
+
 <p>We may add or substitute AI providers in the future. If we do, we will update this section before doing so.</p>
 
 <h2>5. Who we share information with</h2>
