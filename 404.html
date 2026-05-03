@@ -226,26 +226,47 @@
     </div>
 
     <script>
-        // Path detection + invite-code extraction.
-        // GitHub Pages serves THIS file (404.html) for any unresolved
-        // path including /join/AJFHJJ. We branch on whether the URL
-        // is /join/{something} vs anything else.
+        // Path + query detection for invite-code extraction.
+        //
+        // Two URL formats supported:
+        //   (1) /join/?code={CODE}   — Build 36 canonical (HTTP 200)
+        //   (2) /join/{CODE}         — Build 35 fallback (HTTP 404)
+        //
+        // GitHub Pages serves /join/index.html for /join/ (200) and
+        // 404.html for /join/anything-else (404). This file handles
+        // BOTH cases since /join/index.html is a copy of 404.html.
         (function() {
             var path = window.location.pathname || '';
-            // Match /join/ followed by 1+ chars (allow letters/digits, max 6).
-            var m = path.match(/^\/join\/([A-Za-z0-9]{1,8})\/?$/);
+            var search = window.location.search || '';
+            var code = null;
 
-            if (m && m[1]) {
+            // (1) Try query string first — preferred Build 36 format.
+            // URLSearchParams handles encoding + case-insensitive lookup.
+            try {
+                var params = new URLSearchParams(search);
+                var queryCode = params.get('code') || params.get('CODE');
+                if (queryCode) {
+                    code = queryCode.toUpperCase().replace(/[^A-Z0-9]/g, '').substring(0, 6);
+                    if (code.length !== 6) code = null;
+                }
+            } catch (e) { /* URLSearchParams unsupported → fall through */ }
+
+            // (2) Fallback: /join/{CODE} path-based format.
+            if (!code) {
+                var m = path.match(/^\/join\/([A-Za-z0-9]{1,8})\/?$/);
+                if (m && m[1]) {
+                    code = m[1].toUpperCase().substring(0, 6);
+                }
+            }
+
+            if (code) {
                 // INVITE MODE — show the code and update the deep-link href.
-                var code = m[1].toUpperCase().substring(0, 6);
                 document.getElementById('codeDisplay').textContent = code;
-                // The "Open in PebblePath" CTA points back at this same
-                // URL; on iOS with the app installed, the Universal
-                // Link entitlement intercepts the tap and opens the app
-                // directly. Without the app, the user just stays on
-                // this page (which is fine — we're already showing
-                // them the code + download link).
-                var deepLink = 'https://pebblepath.ai/join/' + code;
+                // The "Open in PebblePath" CTA points back at the
+                // canonical Build 36 URL format. On iOS with the app
+                // installed, the Universal Link entitlement intercepts
+                // the tap and opens the app directly.
+                var deepLink = 'https://pebblepath.ai/join/?code=' + code;
                 document.getElementById('openInAppBtn').setAttribute('href', deepLink);
                 document.getElementById('reopenLink').setAttribute('href', deepLink);
             } else if (path === '/join' || path === '/join/') {
