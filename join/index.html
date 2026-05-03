@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="theme-color" content="#3D9B8F">
+
+    <!--
+        Build 35 — custom 404 with two roles:
+
+        (1) Universal Links fallback for /join/{CODE} URLs when the
+            PebblePath app isn't installed. iOS intercepts the URL
+            via the AASA file at /.well-known/apple-app-site-association
+            ONLY when the app is installed. Without the app, the URL
+            falls through to GitHub Pages — which returns 404 because
+            there's no /join/{CODE}.html or /join/{CODE}/index.html.
+            This page renders a friendly "you've been invited" UI with
+            the code extracted via JS + download CTA.
+
+        (2) Generic 404 for any other unresolved path — renders a
+            simple "page not found" with a link back to the homepage.
+            Same file handles both via JS path detection on load.
+
+        Open Graph tags below are STATIC (iMessage / link-preview
+        engines don't execute JS). They render the same "You've been
+        invited to PebblePath" card for every /join/* URL, regardless
+        of the specific code. The code itself is shown in the rendered
+        page body via JS once the user actually opens the link.
+    -->
+
+    <title>You've been invited to PebblePath</title>
+    <meta name="description" content="A family member has invited you to PebblePath — the parenting companion for the early years. Tap to download and join.">
+
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://pebblepath.ai/join/">
+    <meta property="og:title" content="You've been invited to PebblePath">
+    <meta property="og:description" content="A family member has invited you to PebblePath — the parenting companion for the early years. Tap to download and join.">
+    <meta property="og:image" content="https://pebblepath.ai/assets/og-image.jpg">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="The PebblePath app on two iPhones, showing Pebble chat and Felix's dashboard against a teal gradient.">
+    <meta property="og:site_name" content="PebblePath">
+    <meta property="og:locale" content="en_US">
+
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="You've been invited to PebblePath">
+    <meta name="twitter:description" content="A family member has invited you to PebblePath — the parenting companion for the early years.">
+    <meta name="twitter:image" content="https://pebblepath.ai/assets/og-image.jpg">
+
+    <link rel="icon" type="image/png" href="/assets/favicon.png">
+
+    <style>
+        :root {
+            --teal: #3D9B8F;
+            --teal-dark: #2D7A70;
+            --teal-light: #5CBFB0;
+            --terracotta: #C67B5C;
+            --sand: #E8DCC8;
+            --bg: #FAF8F5;
+            --fg: #2C2C2C;
+            --fg-muted: #6B6B6B;
+            --border: #E5E0D6;
+        }
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--bg);
+            color: var(--fg);
+            min-height: 100vh;
+            min-height: 100dvh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 32px 20px;
+            line-height: 1.5;
+        }
+        .container {
+            max-width: 480px;
+            width: 100%;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 8vh;
+        }
+        .logo {
+            width: 72px;
+            height: 72px;
+            border-radius: 18px;
+            background: linear-gradient(135deg, var(--teal-light), var(--teal-dark));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 24px;
+            box-shadow: 0 8px 24px rgba(61, 155, 143, 0.3);
+        }
+        .logo svg {
+            width: 36px;
+            height: 36px;
+            fill: white;
+        }
+        h1 {
+            font-family: 'Nunito', -apple-system, BlinkMacSystemFont, sans-serif;
+            font-size: 28px;
+            font-weight: 800;
+            margin: 0 0 12px;
+            line-height: 1.2;
+            letter-spacing: -0.01em;
+        }
+        .subtitle {
+            color: var(--fg-muted);
+            font-size: 16px;
+            margin: 0 0 32px;
+            max-width: 380px;
+        }
+        .invite-code {
+            background: white;
+            border: 2px dashed var(--teal);
+            border-radius: 16px;
+            padding: 20px 24px;
+            margin-bottom: 32px;
+            min-width: 260px;
+        }
+        .invite-code-label {
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 1.4px;
+            color: var(--fg-muted);
+            text-transform: uppercase;
+            margin-bottom: 6px;
+        }
+        .invite-code-value {
+            font-family: 'SF Mono', Menlo, Monaco, monospace;
+            font-size: 32px;
+            font-weight: 800;
+            letter-spacing: 6px;
+            color: var(--teal-dark);
+        }
+        .cta {
+            display: block;
+            width: 100%;
+            max-width: 320px;
+            padding: 16px 24px;
+            border-radius: 999px;
+            font-weight: 700;
+            font-size: 16px;
+            text-decoration: none;
+            margin-bottom: 12px;
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
+        }
+        .cta:active { transform: scale(0.98); }
+        .cta-primary {
+            background: var(--teal);
+            color: white;
+            box-shadow: 0 4px 16px rgba(61, 155, 143, 0.35);
+        }
+        .cta-primary:hover { background: var(--teal-dark); }
+        .cta-secondary {
+            background: white;
+            color: var(--teal-dark);
+            border: 1.5px solid var(--border);
+        }
+        .cta-secondary:hover { border-color: var(--teal); }
+        .footer-note {
+            font-size: 13px;
+            color: var(--fg-muted);
+            margin-top: 24px;
+            max-width: 360px;
+        }
+        .footer-note a { color: var(--teal-dark); text-decoration: none; }
+
+        /* Generic 404 variant — hidden by default; .show-404-mode flips it */
+        .generic-404 { display: none; }
+        body.show-404-mode .invite-mode { display: none; }
+        body.show-404-mode .generic-404 { display: flex; flex-direction: column; align-items: center; }
+        body.show-404-mode .container { margin-top: 12vh; }
+
+        @media (max-width: 380px) {
+            h1 { font-size: 24px; }
+            .invite-code-value { font-size: 26px; letter-spacing: 4px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- INVITE MODE — shown for /join/* paths -->
+        <div class="invite-mode">
+            <div class="logo" aria-hidden="true">
+                <!-- Inline pebble glyph for offline / no-asset reliability -->
+                <svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="16" cy="16" r="14" fill="none" stroke="white" stroke-width="2.5"/>
+                    <circle cx="16" cy="16" r="6" fill="white"/>
+                </svg>
+            </div>
+            <h1>You've been invited to PebblePath</h1>
+            <p class="subtitle">A family member is using PebblePath to track milestones together. Join them with the invite code below.</p>
+
+            <div class="invite-code">
+                <div class="invite-code-label">Invite code</div>
+                <div class="invite-code-value" id="codeDisplay">······</div>
+            </div>
+
+            <a class="cta cta-primary" id="openInAppBtn" href="https://pebblepath.ai/">Open in PebblePath</a>
+            <a class="cta cta-secondary" href="https://apps.apple.com/app/pebblepath-ai/" id="downloadBtn">Download on the App Store</a>
+
+            <p class="footer-note">
+                After installing, sign up and you'll be asked for an invite code — paste the one above.
+                <br><br>
+                Already have the app? Tap <a href="#" id="reopenLink">Open in PebblePath</a> above.
+            </p>
+        </div>
+
+        <!-- GENERIC 404 — shown for all other unresolved paths -->
+        <div class="generic-404">
+            <div class="logo" aria-hidden="true">
+                <svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="16" cy="16" r="14" fill="none" stroke="white" stroke-width="2.5"/>
+                    <circle cx="16" cy="16" r="6" fill="white"/>
+                </svg>
+            </div>
+            <h1>Page not found</h1>
+            <p class="subtitle">The page you were looking for doesn't exist on pebblepath.ai. Try the homepage instead.</p>
+            <a class="cta cta-primary" href="https://pebblepath.ai/">Go to homepage</a>
+        </div>
+    </div>
+
+    <script>
+        // Path detection + invite-code extraction.
+        // GitHub Pages serves THIS file (404.html) for any unresolved
+        // path including /join/AJFHJJ. We branch on whether the URL
+        // is /join/{something} vs anything else.
+        (function() {
+            var path = window.location.pathname || '';
+            // Match /join/ followed by 1+ chars (allow letters/digits, max 6).
+            var m = path.match(/^\/join\/([A-Za-z0-9]{1,8})\/?$/);
+
+            if (m && m[1]) {
+                // INVITE MODE — show the code and update the deep-link href.
+                var code = m[1].toUpperCase().substring(0, 6);
+                document.getElementById('codeDisplay').textContent = code;
+                // The "Open in PebblePath" CTA points back at this same
+                // URL; on iOS with the app installed, the Universal
+                // Link entitlement intercepts the tap and opens the app
+                // directly. Without the app, the user just stays on
+                // this page (which is fine — we're already showing
+                // them the code + download link).
+                var deepLink = 'https://pebblepath.ai/join/' + code;
+                document.getElementById('openInAppBtn').setAttribute('href', deepLink);
+                document.getElementById('reopenLink').setAttribute('href', deepLink);
+            } else if (path === '/join' || path === '/join/') {
+                // /join/ with no code — show invite UI but with empty placeholder.
+                // The user might have followed an incomplete link; tell them
+                // they need a code from the inviter.
+                document.getElementById('codeDisplay').textContent = 'ASK FOR CODE';
+                document.querySelector('.subtitle').textContent =
+                    'You\'ll need an invite code from the family member who invited you.';
+                document.getElementById('openInAppBtn').style.display = 'none';
+            } else {
+                // GENERIC 404 — flip the mode.
+                document.body.classList.add('show-404-mode');
+            }
+        })();
+    </script>
+</body>
+</html>
