@@ -474,23 +474,29 @@
     75%  { stroke-dashoffset: 0; }
     100% { stroke-dashoffset: 100; }
   }
-  /* Card 2 — Pebble "breathes" (inner disc gently scales). */
+  /* Card 2 — Pebble "breathes" (inner disc gently scales).
+     transform-box: fill-box anchors the origin to the circle's own
+     bounding box (otherwise Safari interprets the origin in CSS-pixel
+     coordinates relative to the SVG container and the scale appears
+     broken / off-center). */
   .bi-pebble-inner {
-    transform-origin: 12px 12px;
+    transform-box: fill-box;
+    transform-origin: center;
     animation: biPebbleBreathe 2.6s ease-in-out infinite;
   }
   @keyframes biPebbleBreathe {
     0%, 100% { transform: scale(1);    opacity: 1; }
-    50%      { transform: scale(1.18); opacity: 0.85; }
+    50%      { transform: scale(1.28); opacity: 0.82; }
   }
   /* Card 3 — Document gently tilts side-to-side. */
   .bi-doc {
-    transform-origin: 50% 50%;
+    transform-box: fill-box;
+    transform-origin: center;
     animation: biDocTilt 4.5s ease-in-out infinite;
   }
   @keyframes biDocTilt {
-    0%, 100% { transform: rotate(-3deg); }
-    50%      { transform: rotate(3deg); }
+    0%, 100% { transform: rotate(-5deg); }
+    50%      { transform: rotate(5deg); }
   }
   /* Card hover amplifies the motion */
   .benefit-card:hover .bi-pebble-inner {
